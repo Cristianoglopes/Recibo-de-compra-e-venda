@@ -12,7 +12,7 @@
     .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
     label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
     input,textarea,select{width:100%;padding:10px;border:1px solid #e6eaf0;border-radius:8px;font-size:14px}
-    .row{display:flex;gap:10px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;cursor:pointer}
     .btn-primary{background:#0369a1;color:#fff}
     .btn-ghost{background:transparent;border:1px solid #e6eaf0}
@@ -35,25 +35,74 @@
         <h2 id="form-title">Dados do Recibo</h2>
 
         <form id="reciboForm">
-          <label>Vendedor (nome / CPF/CNPJ)</label>
-          <input id="vendedor" placeholder="Ex: João da Silva - CPF 000.000.000-00" required />
-
-          <label>Comprador (nome / CPF/CNPJ)</label>
-          <input id="comprador" placeholder="Ex: Maria Souza - CPF 111.111.111-11" required />
-
-          <div class="row" style="margin-top:10px">
-            <div style="flex:1">
-              <label>Endereço do Imóvel</label>
-              <input id="endereco" placeholder="Rua, número, bairro, cidade - UF" />
+          <div id="vendedoresArea">
+            <h3>Vendedores</h3>
+            <div class="vendedor">
+              <label>Nome do Vendedor</label>
+              <input class="vendedorNome" placeholder="Ex: JOÃO DA SILVA" required />
+              <label>CPF</label>
+              <input class="vendedorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
             </div>
-            <div style="width:120px">
-              <label>Data</label>
-              <input id="data" type="date" />
+          </div>
+          <button type="button" class="btn btn-ghost" id="addVendedorBtn">+ Adicionar Vendedor</button>
+
+          <div id="compradoresArea" style="margin-top:10px">
+            <h3>Compradores</h3>
+            <div class="comprador">
+              <label>Nome do Comprador</label>
+              <input class="compradorNome" placeholder="Ex: MARIA SOUZA" required />
+              <label>CPF</label>
+              <input class="compradorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost" id="addCompradorBtn">+ Adicionar Comprador</button>
+
+          <h3 style="margin-top:20px">Descrição do Imóvel</h3>
+          <label>Tipo</label>
+          <select id="tipoImovel">
+            <option value="Área de Terra">Área de Terra</option>
+            <option value="Lote">Lote</option>
+            <option value="Casa">Casa</option>
+          </select>
+
+          <label>Rua/Avenida</label>
+          <input id="rua" placeholder="Ex: Rua das Flores" />
+
+          <div class="row">
+            <div style="flex:1">
+              <label>Número</label>
+              <input id="numero" />
+            </div>
+            <div style="flex:2">
+              <label>Bairro</label>
+              <input id="bairro" />
             </div>
           </div>
 
-          <label style="margin-top:10px">Valor (R$)</label>
-          <input id="valor" inputmode="decimal" placeholder="100000.00" />
+          <div class="row">
+            <div style="flex:2">
+              <label>Cidade</label>
+              <input id="cidade" />
+            </div>
+            <div style="flex:1">
+              <label>Estado</label>
+              <input id="estado" maxlength="2" />
+            </div>
+          </div>
+
+          <label>CEP</label>
+          <input id="cep" placeholder="00000-000" pattern="\\d{5}-\\d{3}" />
+
+          <div class="row" style="margin-top:10px">
+            <div style="flex:1">
+              <label>Data</label>
+              <input id="data" type="date" />
+            </div>
+            <div style="flex:1">
+              <label>Valor (R$)</label>
+              <input id="valor" inputmode="decimal" placeholder="100000.00" />
+            </div>
+          </div>
 
           <label>Forma de Pagamento</label>
           <select id="forma">
@@ -97,7 +146,6 @@
   </div>
 
   <script>
-    // Seleções de elementos
     const form = document.getElementById('reciboForm');
     const gerarBtn = document.getElementById('gerarBtn');
     const limparBtn = document.getElementById('limparBtn');
@@ -107,53 +155,90 @@
     const baixarBtn = document.getElementById('baixarBtn');
     const copiarBtn = document.getElementById('copiarBtn');
 
-    // Função para formatar valor em reais
+    const addVendedorBtn = document.getElementById('addVendedorBtn');
+    const addCompradorBtn = document.getElementById('addCompradorBtn');
+
+    addVendedorBtn.addEventListener('click', ()=>{
+      const div = document.createElement('div');
+      div.classList.add('vendedor');
+      div.innerHTML = `
+        <label>Nome do Vendedor</label>
+        <input class="vendedorNome" placeholder="Ex: JOÃO DA SILVA" required />
+        <label>CPF</label>
+        <input class="vendedorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
+      `;
+      document.getElementById('vendedoresArea').appendChild(div);
+    });
+
+    addCompradorBtn.addEventListener('click', ()=>{
+      const div = document.createElement('div');
+      div.classList.add('comprador');
+      div.innerHTML = `
+        <label>Nome do Comprador</label>
+        <input class="compradorNome" placeholder="Ex: MARIA SOUZA" required />
+        <label>CPF</label>
+        <input class="compradorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
+      `;
+      document.getElementById('compradoresArea').appendChild(div);
+    });
+
     function formatBRL(value){
       if(!value) return 'R$ 0,00';
-      // aceita vírgula ou ponto
       const n = Number(String(value).replace(/,/g,'.')) || 0;
       return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     }
 
-    // Gera o texto do recibo com base nos campos
     function gerarTexto(){
-      const vendedor = document.getElementById('vendedor').value.trim();
-      const comprador = document.getElementById('comprador').value.trim();
-      const endereco = document.getElementById('endereco').value.trim();
+      const vendedores = [...document.querySelectorAll('.vendedor')].map(v=>{
+        const nome = v.querySelector('.vendedorNome').value.trim().toUpperCase();
+        const cpf = v.querySelector('.vendedorCpf').value.trim();
+        return `**${nome}** (CPF ${cpf})`;
+      });
+      const compradores = [...document.querySelectorAll('.comprador')].map(c=>{
+        const nome = c.querySelector('.compradorNome').value.trim().toUpperCase();
+        const cpf = c.querySelector('.compradorCpf').value.trim();
+        return `**${nome}** (CPF ${cpf})`;
+      });
+
+      const tipo = document.getElementById('tipoImovel').value;
+      const rua = document.getElementById('rua').value.trim();
+      const numero = document.getElementById('numero').value.trim();
+      const bairro = document.getElementById('bairro').value.trim();
+      const cidade = document.getElementById('cidade').value.trim();
+      const estado = document.getElementById('estado').value.trim();
+      const cep = document.getElementById('cep').value.trim();
+
       const data = document.getElementById('data').value;
       const valor = document.getElementById('valor').value.trim();
       const forma = document.getElementById('forma').value;
       const obs = document.getElementById('obs').value.trim();
 
-      if(!vendedor || !comprador){
-        alert('Preencha pelo menos Vendedor e Comprador.');
+      if(vendedores.length===0 || compradores.length===0){
+        alert('Preencha ao menos um vendedor e um comprador.');
         return null;
       }
 
       const dataFmt = data ? new Date(data).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
       const valorFmt = formatBRL(valor);
 
-      // Texto legal padrão (exemplo):
-      let texto = `RECIBO DE PAGAMENTO - COMPRA E VENDA DE IMÓVEL\n\n`;
-      texto += `Vendedor: ${vendedor}\n`;
-      texto += `Comprador: ${comprador}\n`;
-      if(endereco) texto += `Endereço do imóvel: ${endereco}\n`;
-      texto += `Data: ${dataFmt}\n`;
-      texto += `Valor recebido: ${valorFmt} (${extenso(valor)})\n`;
-      texto += `Forma de pagamento: ${forma}\n\n`;
-      if(obs) texto += `Observações: ${obs}\n\n`;
-      texto += `O vendedor declara ter recebido do comprador a quantia acima referida, a título de pagamento relativo à compra e venda do imóvel descrito, nada mais tendo a reclamar a qualquer título.\n\n`;
-      texto += `Assinaturas:\n\n__________________________________\nVendedor\n\n__________________________________\nComprador\n`;
+      let texto = `RECIBO DE PAGAMENTO - COMPRA E VENDA DE IMÓVEL\\n\\n`;
+      texto += `Vendedor(es): ${vendedores.join('; ')}\\n`;
+      texto += `Comprador(es): ${compradores.join('; ')}\\n`;
+      texto += `Imóvel: ${tipo} localizado em ${rua}, nº ${numero}, Bairro ${bairro}, ${cidade} - ${estado}, CEP ${cep}\\n`;
+      texto += `Data: ${dataFmt}\\n`;
+      texto += `Valor recebido: ${valorFmt} (${extenso(valor)})\\n`;
+      texto += `Forma de pagamento: ${forma}\\n\\n`;
+      if(obs) texto += `Observações: ${obs}\\n\\n`;
+      texto += `Cláusulas Fixas: \\n1. O vendedor declara ser legítimo possuidor do imóvel descrito neste recibo. \\n2. O comprador declara ter pleno conhecimento do estado do imóvel. \\n3. As partes elegem o foro da comarca do imóvel para dirimir quaisquer dúvidas oriundas deste recibo. \\n\\n`;
+      texto += `O vendedor declara ter recebido do comprador a quantia acima referida, nada mais tendo a reclamar a qualquer título.\\n\\n`;
+      texto += `Assinaturas:\\n\\n__________________________________\\nVendedor(es)\\n\\n__________________________________\\nComprador(es)\\n`;
 
       return texto;
     }
 
-    // Converte número para extenso (simples, suporta até milhões)
     function extenso(valor){
       if(!valor) return 'zero reais';
-      // remover milhares de separadores e garantir número
       let n = Number(String(valor).replace(/[^0-9,\.]/g,'').replace(/,/g,'.')) || 0;
-      // para não incluir centavos com muita complexidade, vamos formatar somente reais e centavos
       const inteiro = Math.floor(n);
       const cent = Math.round((n - inteiro) * 100);
       const extReais = numeroPorExtenso(inteiro) + (inteiro===1 ? ' real' : ' reais');
@@ -161,38 +246,21 @@
       return extReais + extCent;
     }
 
-    // Função auxiliar simplificada para escrever números por extenso (0 - 999999)
     function numeroPorExtenso(n){
       if(n===0) return 'zero';
       const unidades = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
       const dezenas = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
       const centenas = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
-
       if(n===100) return 'cem';
       if(n < 20) return unidades[n];
-      if(n < 100){
-        const d = Math.floor(n/10);
-        const r = n%10;
-        return dezenas[d] + (r? ' e ' + unidades[r] : '');
-      }
-      if(n < 1000){
-        const c = Math.floor(n/100);
-        const r = n%100;
-        return centenas[c] + (r? ' e ' + numeroPorExtenso(r) : '');
-      }
-      if(n < 1000000){
-        const milhares = Math.floor(n/1000);
-        const resto = n%1000;
-        const milStr = (milhares===1? 'mil' : numeroPorExtenso(milhares) + ' mil');
-        return milStr + (resto? (resto<100? ' e ' : ' ') + numeroPorExtenso(resto) : '');
-      }
+      if(n < 100){ const d = Math.floor(n/10); const r = n%10; return dezenas[d] + (r? ' e ' + unidades[r] : ''); }
+      if(n < 1000){ const c = Math.floor(n/100); const r = n%100; return centenas[c] + (r? ' e ' + numeroPorExtenso(r) : ''); }
+      if(n < 1000000){ const milhares = Math.floor(n/1000); const resto = n%1000; const milStr = (milhares===1? 'mil' : numeroPorExtenso(milhares) + ' mil'); return milStr + (resto? (resto<100? ' e ' : ' ') + numeroPorExtenso(resto) : ''); }
       return n.toString();
     }
 
-    // Renderiza o recibo no preview com quebras de linha
     function renderPreview(text){
-      if(!text){ return; }
-      // converter quebras de linha em <br> e preservar espaços
+      if(!text) return;
       receiptArea.innerHTML = '';
       const pre = document.createElement('pre');
       pre.style.margin = '0';
@@ -201,7 +269,6 @@
       receiptArea.appendChild(pre);
     }
 
-    // Eventos
     gerarBtn.addEventListener('click', ()=>{
       const texto = gerarTexto();
       if(texto) renderPreview(texto);
@@ -213,76 +280,11 @@
     });
 
     salvarModeloBtn.addEventListener('click', ()=>{
-      // salva os valores no localStorage como modelo
-      const modelo = {
-        vendedor: document.getElementById('vendedor').value,
-        comprador: document.getElementById('comprador').value,
-        endereco: document.getElementById('endereco').value,
-        forma: document.getElementById('forma').value,
-        obs: document.getElementById('obs').value
-      };
-      localStorage.setItem('reciboModelo', JSON.stringify(modelo));
+      const modelo = form.innerHTML;
+      localStorage.setItem('reciboModelo', modelo);
       alert('Modelo salvo no navegador.');
     });
 
-    // Ao carregar a página, tenta recuperar modelo salvo
     window.addEventListener('load', ()=>{
-      const m = localStorage.getItem('reciboModelo');
-      if(m){
-        try{ const obj = JSON.parse(m);
-          document.getElementById('vendedor').value = obj.vendedor || '';
-          document.getElementById('comprador').value = obj.comprador || '';
-          document.getElementById('endereco').value = obj.endereco || '';
-          document.getElementById('forma').value = obj.forma || 'à vista';
-          document.getElementById('obs').value = obj.obs || '';
-        }catch(e){}
-      }
-    });
-
-    // Imprimir (usa window.print) - abre diálogo do navegador para salvar como PDF
-    imprimirBtn.addEventListener('click', ()=>{
-      const texto = gerarTexto();
-      if(!texto) return;
-      // cria uma janela temporária para imprimir somente o recibo
-      const w = window.open('','_blank');
-      const style = `
-        <style>body{font-family:Arial,Helvetica,sans-serif;padding:24px;color:#111} pre{white-space:pre-wrap;font-size:14px}</style>`;
-      w.document.write(`<html><head><title>Recibo</title>${style}</head><body><pre>${escapeHtml(texto)}</pre></body></html>`);
-      w.document.close();
-      w.focus();
-      w.print();
-      // não fechamos automaticamente para que o usuário possa baixar se quiser
-    });
-
-    // Baixar como .txt
-    baixarBtn.addEventListener('click', ()=>{
-      const texto = gerarTexto();
-      if(!texto) return;
-      const blob = new Blob([texto],{type:'text/plain;charset=utf-8'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'recibo.txt';
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
-    });
-
-    // Copiar para área de transferência
-    copiarBtn.addEventListener('click', async ()=>{
-      const texto = gerarTexto();
-      if(!texto) return;
-      try{
-        await navigator.clipboard.writeText(texto);
-        alert('Recibo copiado para a área de transferência.');
-      }catch(e){
-        alert('Não foi possível copiar automaticamente. Gere e copie manualmente.');
-      }
-    });
-
-    // Pequena função de escape para inclusão em HTML
-    function escapeHtml(str){
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'\n');
-    }
-
-  </script>
-</body>
-</html>
+      // simples restauração dos campos salvos
+   
