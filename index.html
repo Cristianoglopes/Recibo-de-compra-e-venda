@@ -8,13 +8,19 @@
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
     h1 { text-align: center; margin-bottom: 20px; }
     label { display: block; margin-top: 10px; }
-    input, select, textarea { padding: 6px; width: 100%; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; }
+    input, select, textarea { padding: 6px; width: 100%; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
     button { margin-top: 10px; padding: 8px 12px; cursor: pointer; border-radius: 6px; border: none; background: #4CAF50; color: white; }
     button:hover { background: #45a049; }
     .section { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 10px; background: #fff; }
     .recibo { margin-top: 30px; padding: 20px; border: 2px solid #000; background: #fff; }
     .bold { font-weight: bold; }
     .download-buttons { margin-top: 15px; display: flex; gap: 10px; }
+    .assinaturas { margin-top: 40px; display: flex; justify-content: space-around; flex-wrap: wrap; }
+    .assinatura { text-align: center; margin-top: 30px; min-width: 200px; }
+    .linha { border-top: 1px dashed #000; margin: 0 auto 6px auto; width: 250px; }
+    .remove-btn { background: #e74c3c; }
+    .remove-btn:hover { background: #c0392b; }
+    .small { font-size: 0.9em; color: #555; }
   </style>
 </head>
 <body>
@@ -23,36 +29,42 @@
   <form id="reciboForm">
     <div class="section" id="vendedores">
       <h3>Vendedores</h3>
-      <div class="vendedor">
-        <label>Nome:</label>
-        <input type="text" name="vendedorNome[]" required>
-        <label>CPF:</label>
-        <input type="text" name="vendedorCPF[]" required placeholder="000.000.000-00">
-        <label>Endereço:</label>
-        <input type="text" name="vendedorEndereco[]" required>
-        <label>Profissão:</label>
-        <input type="text" name="vendedorProfissao[]">
-        <label>Estado Civil:</label>
-        <input type="text" name="vendedorEstadoCivil[]">
+      <div id="vendedoresList">
+        <div class="vendedor">
+          <label>Nome:</label>
+          <input type="text" name="vendedorNome[]" required>
+          <label>CPF:</label>
+          <input type="text" name="vendedorCPF[]" required placeholder="000.000.000-00">
+          <label>Endereço:</label>
+          <input type="text" name="vendedorEndereco[]" required>
+          <label>Profissão:</label>
+          <input type="text" name="vendedorProfissao[]">
+          <label>Estado Civil:</label>
+          <input type="text" name="vendedorEstadoCivil[]">
+          <button type="button" class="remove-btn">Remover</button>
+        </div>
       </div>
-      <button type="button" onclick="addVendedor()">Adicionar Vendedor</button>
+      <button type="button" id="addVendedorBtn">Adicionar Vendedor</button>
     </div>
 
     <div class="section" id="compradores">
       <h3>Compradores</h3>
-      <div class="comprador">
-        <label>Nome:</label>
-        <input type="text" name="compradorNome[]" required>
-        <label>CPF:</label>
-        <input type="text" name="compradorCPF[]" required placeholder="000.000.000-00">
-        <label>Endereço:</label>
-        <input type="text" name="compradorEndereco[]" required>
-        <label>Profissão:</label>
-        <input type="text" name="compradorProfissao[]">
-        <label>Estado Civil:</label>
-        <input type="text" name="compradorEstadoCivil[]">
+      <div id="compradoresList">
+        <div class="comprador">
+          <label>Nome:</label>
+          <input type="text" name="compradorNome[]" required>
+          <label>CPF:</label>
+          <input type="text" name="compradorCPF[]" required placeholder="000.000.000-00">
+          <label>Endereço:</label>
+          <input type="text" name="compradorEndereco[]" required>
+          <label>Profissão:</label>
+          <input type="text" name="compradorProfissao[]">
+          <label>Estado Civil:</label>
+          <input type="text" name="compradorEstadoCivil[]">
+          <button type="button" class="remove-btn">Remover</button>
+        </div>
       </div>
-      <button type="button" onclick="addComprador()">Adicionar Comprador</button>
+      <button type="button" id="addCompradorBtn">Adicionar Comprador</button>
     </div>
 
     <div class="section">
@@ -63,6 +75,23 @@
         <option value="Lote">Lote</option>
         <option value="Casa">Casa</option>
       </select>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+        <div style="flex:2">
+          <label>Área (numérico):</label>
+          <input type="number" step="any" name="areaValor" placeholder="Ex: 1500">
+        </div>
+        <div style="flex:1">
+          <label>Unidade:</label>
+          <select name="areaUnidade">
+            <option value="m²">m²</option>
+            <option value="ha">ha</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Descrição da Área:</label>
+      <textarea name="descricaoArea" rows="3"></textarea>
 
       <label>Rua/Avenida:</label>
       <input type="text" name="rua" required>
@@ -81,7 +110,7 @@
     <div class="section">
       <h3>Valores</h3>
       <label>Valor da Negociação (R$):</label>
-      <input type="number" name="valor" required>
+      <input type="number" name="valor" step="any" required>
     </div>
 
     <div class="section">
@@ -89,20 +118,36 @@
       <textarea name="clausulasAdicionais" rows="4" placeholder="Digite cláusulas adicionais, se necessário..."></textarea>
     </div>
 
-    <button type="button" onclick="gerarRecibo()">Gerar Recibo</button>
+    <div class="section">
+      <h3>Local e Data</h3>
+      <label>Local:</label>
+      <input type="text" name="localAssinatura" required>
+      <label>Data:</label>
+      <input type="date" name="dataAssinatura" required>
+    </div>
+
+    <button type="button" id="gerarBtn">Gerar Recibo</button>
   </form>
 
-  <div id="reciboGerado" class="recibo"></div>
+  <div id="reciboGerado" class="recibo" aria-live="polite"></div>
   <div id="downloadButtons" class="download-buttons" style="display:none;">
-    <button onclick="baixarArquivo('pdf')">Baixar PDF</button>
-    <button onclick="baixarArquivo('txt')">Baixar TXT</button>
-    <button onclick="baixarArquivo('doc')">Baixar Word</button>
+    <button id="baixarPdfBtn">Baixar PDF</button>
+    <button id="baixarTxtBtn">Baixar TXT</button>
+    <button id="baixarDocBtn">Baixar Word</button>
   </div>
 
   <script>
-    function addVendedor() {
+    // Robust insertion: use dedicated list containers and appendChild instead of insertBefore
+    const vendedoresList = document.getElementById('vendedoresList');
+    const compradoresList = document.getElementById('compradoresList');
+    const addVendedorBtn = document.getElementById('addVendedorBtn');
+    const addCompradorBtn = document.getElementById('addCompradorBtn');
+    const gerarBtn = document.getElementById('gerarBtn');
+
+    // Create a new vendedor element
+    function createVendedorElement() {
       const div = document.createElement('div');
-      div.classList.add('vendedor');
+      div.className = 'vendedor';
       div.innerHTML = `
         <label>Nome:</label>
         <input type="text" name="vendedorNome[]" required>
@@ -114,13 +159,14 @@
         <input type="text" name="vendedorProfissao[]">
         <label>Estado Civil:</label>
         <input type="text" name="vendedorEstadoCivil[]">
+        <button type="button" class="remove-btn">Remover</button>
       `;
-      document.getElementById('vendedores').insertBefore(div, document.querySelector('#vendedores button'));
+      return div;
     }
 
-    function addComprador() {
+    function createCompradorElement() {
       const div = document.createElement('div');
-      div.classList.add('comprador');
+      div.className = 'comprador';
       div.innerHTML = `
         <label>Nome:</label>
         <input type="text" name="compradorNome[]" required>
@@ -132,28 +178,109 @@
         <input type="text" name="compradorProfissao[]">
         <label>Estado Civil:</label>
         <input type="text" name="compradorEstadoCivil[]">
+        <button type="button" class="remove-btn">Remover</button>
       `;
-      document.getElementById('compradores').insertBefore(div, document.querySelector('#compradores button'));
+      return div;
+    }
+
+    // Event listeners to add elements
+    addVendedorBtn.addEventListener('click', () => {
+      vendedoresList.appendChild(createVendedorElement());
+    });
+
+    addCompradorBtn.addEventListener('click', () => {
+      compradoresList.appendChild(createCompradorElement());
+    });
+
+    // Event delegation for remove buttons (works for dynamically added elements)
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('remove-btn')) {
+        const item = e.target.closest('.vendedor') || e.target.closest('.comprador');
+        if (item) item.remove();
+      }
+    });
+
+    // CPF formatting on input (delegated)
+    document.addEventListener('input', (e) => {
+      if (!e.target) return;
+      if (e.target.matches('input[name="vendedorCPF[]"], input[name="compradorCPF[]"]')) {
+        const v = e.target.value.replace(/\D/g, '').slice(0,11);
+        let out = v;
+        if (v.length > 9) out = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) out = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 3) out = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+        e.target.value = out;
+      }
+    });
+
+    // Helper to safely get form values
+    function getAllSafe(formData, name) {
+      // returns array of values or []
+      try {
+        return formData.getAll(name) || [];
+      } catch (e) { return []; }
+    }
+
+    function formatBRL(valueRaw) {
+      if (!valueRaw) return 'R$ 0,00';
+      const n = Number(String(valueRaw).replace(/,/g, '.')) || 0;
+      return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
     function formatarCPF(cpf) {
-      cpf = cpf.replace(/\D/g, "");
-      return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+      if (!cpf) return '';
+      const d = String(cpf).replace(/\D/g, '');
+      if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      return cpf; // return as-is if not full
     }
 
-    function gerarRecibo() {
+    gerarBtn.addEventListener('click', () => {
       const form = document.getElementById('reciboForm');
       const data = new FormData(form);
 
-      const vendedores = data.getAll('vendedorNome[]').map((nome, i) => `
-        <p><span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('vendedorCPF[]')[i])}, ${data.getAll('vendedorEstadoCivil[]')[i]}, ${data.getAll('vendedorProfissao[]')[i]}, residente em ${data.getAll('vendedorEndereco[]')[i]}.</p>`).join('');
+      const vendedoresNomes = getAllSafe(data, 'vendedorNome[]');
+      const vendedoresCpfs = getAllSafe(data, 'vendedorCPF[]');
+      const vendedoresEnd = getAllSafe(data, 'vendedorEndereco[]');
+      const vendedoresProf = getAllSafe(data, 'vendedorProfissao[]');
+      const vendedoresEC = getAllSafe(data, 'vendedorEstadoCivil[]');
 
-      const compradores = data.getAll('compradorNome[]').map((nome, i) => `
-        <p><span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('compradorCPF[]')[i])}, ${data.getAll('compradorEstadoCivil[]')[i]}, ${data.getAll('compradorProfissao[]')[i]}, residente em ${data.getAll('compradorEndereco[]')[i]}.</p>`).join('');
+      const compradoresNomes = getAllSafe(data, 'compradorNome[]');
+      const compradoresCpfs = getAllSafe(data, 'compradorCPF[]');
+      const compradoresEnd = getAllSafe(data, 'compradorEndereco[]');
+      const compradoresProf = getAllSafe(data, 'compradorProfissao[]');
+      const compradoresEC = getAllSafe(data, 'compradorEstadoCivil[]');
 
-      const tipoImovel = data.get('tipoImovel');
-      const endereco = `${data.get('rua')}, nº ${data.get('numero')}, Bairro ${data.get('bairro')}, ${data.get('cidade')} - ${data.get('estado')}, CEP ${data.get('cep')}`;
-      const valor = parseFloat(data.get('valor')).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      if (vendedoresNomes.length === 0 || compradoresNomes.length === 0) {
+        alert('Preencha ao menos um vendedor e um comprador.');
+        return;
+      }
+
+      // Build seller and buyer blocks safely, guarding index out-of-bounds
+      const vendedores = vendedoresNomes.map((nome, i) => {
+        const cpf = formatarCPF(vendedoresCpfs[i] || '');
+        const estadoCivil = vendedoresEC[i] || '';
+        const profissao = vendedoresProf[i] || '';
+        const endereco = vendedoresEnd[i] || '';
+        return `<p><span class="bold">${String(nome || '').toUpperCase()}</span>, CPF: ${cpf}${estadoCivil? ', ' + estadoCivil : ''}${profissao? ', ' + profissao : ''}${endereco? ', residente em ' + endereco : ''}.</p>`;
+      }).join('');
+
+      const compradores = compradoresNomes.map((nome, i) => {
+        const cpf = formatarCPF(compradoresCpfs[i] || '');
+        const estadoCivil = compradoresEC[i] || '';
+        const profissao = compradoresProf[i] || '';
+        const endereco = compradoresEnd[i] || '';
+        return `<p><span class="bold">${String(nome || '').toUpperCase()}</span>, CPF: ${cpf}${estadoCivil? ', ' + estadoCivil : ''}${profissao? ', ' + profissao : ''}${endereco? ', residente em ' + endereco : ''}.</p>`;
+      }).join('');
+
+      const tipoImovel = data.get('tipoImovel') || '';
+      const areaValor = data.get('areaValor');
+      const areaUnidade = data.get('areaUnidade');
+      const areaTexto = areaValor ? `${areaValor} ${areaUnidade || ''}` : '';
+      const descricaoArea = data.get('descricaoArea') || '';
+      const enderecoPrincipal = `${data.get('rua') || ''}${data.get('numero')? ', nº ' + data.get('numero') : ''}${data.get('bairro')? ', Bairro ' + data.get('bairro') : ''}${data.get('cidade')? ', ' + data.get('cidade') : ''}${data.get('estado')? ' - ' + data.get('estado') : ''}${data.get('cep')? ', CEP ' + data.get('cep') : ''}`;
+
+      const valorRaw = data.get('valor');
+      const valor = formatBRL(valorRaw);
 
       const clausulasFixas = `
         <p>As partes acima identificadas celebram o presente recibo de compra e venda de imóvel, regendo-se pelas cláusulas seguintes:</p>
@@ -166,43 +293,72 @@
 
       const clausulasAdicionais = data.get('clausulasAdicionais') ? `<p><strong>Cláusulas adicionais:</strong> ${data.get('clausulasAdicionais')}</p>` : '';
 
+      const local = data.get('localAssinatura') || '';
+      const dataAss = data.get('dataAssinatura') ? new Date(data.get('dataAssinatura')).toLocaleDateString('pt-BR') : '';
+      const localData = `<p><strong>Local e Data:</strong> ${local}${(local && dataAss)? ', ' + dataAss : (dataAss? dataAss : '')}</p>`;
+
+      // Signatures area: one block per seller and per buyer
+      const assinaturasHTML = `
+        <div class="assinaturas">
+          ${vendedoresNomes.map(nome => `
+            <div class="assinatura">
+              <div class="linha"></div>
+              <p class="small">${String(nome || '')}</p>
+              <p>Vendedor(a)</p>
+            </div>`).join('')}
+          ${compradoresNomes.map(nome => `
+            <div class="assinatura">
+              <div class="linha"></div>
+              <p class="small">${String(nome || '')}</p>
+              <p>Comprador(a)</p>
+            </div>`).join('')}
+        </div>
+      `;
+
       const reciboHTML = `
         <h2>Recibo de Compra e Venda de Imóvel</h2>
         <h3>Vendedores:</h3> ${vendedores}
         <h3>Compradores:</h3> ${compradores}
-        <p><strong>Imóvel:</strong> ${tipoImovel}, localizado em ${endereco}.</p>
+        <p><strong>Imóvel:</strong> ${tipoImovel}${enderecoPrincipal? ', localizado em ' + enderecoPrincipal : ''}.</p>
+        ${areaTexto ? `<p><strong>Área:</strong> ${areaTexto}</p>` : ''}
+        ${descricaoArea ? `<p><strong>Descrição:</strong> ${descricaoArea}</p>` : ''}
         <p><strong>Valor:</strong> ${valor}</p>
         ${clausulasFixas}
         ${clausulasAdicionais}
+        ${localData}
+        ${assinaturasHTML}
       `;
 
       document.getElementById('reciboGerado').innerHTML = reciboHTML;
       document.getElementById('downloadButtons').style.display = 'flex';
-    }
+    });
 
-    function baixarArquivo(tipo) {
-      const recibo = document.getElementById('reciboGerado').innerHTML;
-      let blob, ext, mime;
-
-      if (tipo === 'txt') {
-        const text = document.getElementById('reciboGerado').innerText;
-        blob = new Blob([text], { type: 'text/plain' });
-        ext = 'txt';
-      } else if (tipo === 'doc') {
-        blob = new Blob(['<html><body>' + recibo + '</body></html>'], { type: 'application/msword' });
-        ext = 'doc';
-      } else if (tipo === 'pdf') {
-        alert("Exportar para PDF requer uma biblioteca adicional como jsPDF. Posso incluir isso se desejar.");
-        return;
-      }
-
+    // Download handlers
+    document.getElementById('baixarTxtBtn').addEventListener('click', () => {
+      const text = document.getElementById('reciboGerado').innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `recibo.${ext}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+      const a = document.createElement('a'); a.href = url; a.download = 'recibo.txt'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('baixarDocBtn').addEventListener('click', () => {
+      const html = '<html><head><meta charset="utf-8"></head><body>' + document.getElementById('reciboGerado').innerHTML + '</body></html>';
+      const blob = new Blob([html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'recibo.doc'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // PDF export left as opt-in (requires external library) - show helpful message
+    document.getElementById('baixarPdfBtn').addEventListener('click', () => {
+      alert('Exportar para PDF requer uma biblioteca adicional (ex: jsPDF). Posso incluir essa biblioteca se você quiser que o botão gere o PDF automaticamente.');
+    });
+
+    // Accessibility: focus first input on load
+    window.addEventListener('load', () => {
+      const first = document.querySelector('input'); if (first) first.focus();
+    });
+
+    // --- End of script ---
   </script>
 </body>
 </html>
