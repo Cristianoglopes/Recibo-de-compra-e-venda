@@ -1,290 +1,139 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Gerador de Recibo - Compra e Venda de Imóvel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Recibo de Compra e Venda de Imóveis</title>
   <style>
-    :root{--bg:#f7fafc;--card:#ffffff;--accent:#0f172a;--muted:#6b7280}
-    body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial;background:var(--bg);margin:0;padding:24px;color:var(--accent)}
-    .container{max-width:960px;margin:0 auto}
-    .grid{display:grid;grid-template-columns:1fr 420px;gap:20px}
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
-    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-    input,textarea,select{width:100%;padding:10px;border:1px solid #e6eaf0;border-radius:8px;font-size:14px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;cursor:pointer}
-    .btn-primary{background:#0369a1;color:#fff}
-    .btn-ghost{background:transparent;border:1px solid #e6eaf0}
-    .preview{min-height:200px}
-    .receipt{padding:18px;border:1px dashed #e6eaf0;border-radius:8px;background:#fff}
-    h1{margin:0 0 12px 0}
-    .muted{color:var(--muted);font-size:13px}
-    footer{margin-top:16px;font-size:13px;color:var(--muted)}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 10px; }
+    input, select { padding: 5px; width: 100%; margin-top: 5px; }
+    button { margin-top: 10px; padding: 8px 12px; cursor: pointer; border-radius: 6px; }
+    .section { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; border-radius: 8px; }
+    .recibo { margin-top: 30px; padding: 20px; border: 2px solid #000; }
+    .bold { font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Gerador de Recibo - Compra e Venda de Imóvel</h1>
-    <p class="muted">Preencha os dados à esquerda e veja o recibo à direita. Pronto para imprimir ou salvar como PDF.</p>
+  <h1>Gerador de Recibo de Compra e Venda de Imóveis</h1>
 
-    <div class="grid" role="main">
-      <!-- Formulário -->
-      <div class="card" aria-labelledby="form-title">
-        <h2 id="form-title">Dados do Recibo</h2>
-
-        <form id="reciboForm">
-          <div id="vendedoresArea">
-            <h3>Vendedores</h3>
-            <div class="vendedor">
-              <label>Nome do Vendedor</label>
-              <input class="vendedorNome" placeholder="Ex: JOÃO DA SILVA" required />
-              <label>CPF</label>
-              <input class="vendedorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
-            </div>
-          </div>
-          <button type="button" class="btn btn-ghost" id="addVendedorBtn">+ Adicionar Vendedor</button>
-
-          <div id="compradoresArea" style="margin-top:10px">
-            <h3>Compradores</h3>
-            <div class="comprador">
-              <label>Nome do Comprador</label>
-              <input class="compradorNome" placeholder="Ex: MARIA SOUZA" required />
-              <label>CPF</label>
-              <input class="compradorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
-            </div>
-          </div>
-          <button type="button" class="btn btn-ghost" id="addCompradorBtn">+ Adicionar Comprador</button>
-
-          <h3 style="margin-top:20px">Descrição do Imóvel</h3>
-          <label>Tipo</label>
-          <select id="tipoImovel">
-            <option value="Área de Terra">Área de Terra</option>
-            <option value="Lote">Lote</option>
-            <option value="Casa">Casa</option>
-          </select>
-
-          <label>Rua/Avenida</label>
-          <input id="rua" placeholder="Ex: Rua das Flores" />
-
-          <div class="row">
-            <div style="flex:1">
-              <label>Número</label>
-              <input id="numero" />
-            </div>
-            <div style="flex:2">
-              <label>Bairro</label>
-              <input id="bairro" />
-            </div>
-          </div>
-
-          <div class="row">
-            <div style="flex:2">
-              <label>Cidade</label>
-              <input id="cidade" />
-            </div>
-            <div style="flex:1">
-              <label>Estado</label>
-              <input id="estado" maxlength="2" />
-            </div>
-          </div>
-
-          <label>CEP</label>
-          <input id="cep" placeholder="00000-000" pattern="\\d{5}-\\d{3}" />
-
-          <div class="row" style="margin-top:10px">
-            <div style="flex:1">
-              <label>Data</label>
-              <input id="data" type="date" />
-            </div>
-            <div style="flex:1">
-              <label>Valor (R$)</label>
-              <input id="valor" inputmode="decimal" placeholder="100000.00" />
-            </div>
-          </div>
-
-          <label>Forma de Pagamento</label>
-          <select id="forma">
-            <option value="à vista">À vista</option>
-            <option value="financiamento">Financiamento</option>
-            <option value="parcelado">Parcelado</option>
-            <option value="outros">Outros</option>
-          </select>
-
-          <label style="margin-top:10px">Observações</label>
-          <textarea id="obs" rows="4" placeholder="Cláusulas específicas, condição de entrega das chaves, etc."></textarea>
-
-          <div style="display:flex;gap:10px;margin-top:12px">
-            <button class="btn btn-primary" type="button" id="gerarBtn">Gerar Recibo</button>
-            <button class="btn btn-ghost" type="button" id="limparBtn">Limpar</button>
-            <button class="btn btn-ghost" type="button" id="salvarModeloBtn">Salvar modelo</button>
-          </div>
-
-        </form>
-
-        <footer>Recomenda-se revisar o documento com seu advogado antes de uso em transações reais.</footer>
+  <form id="reciboForm">
+    <div class="section" id="vendedores">
+      <h3>Vendedores</h3>
+      <div class="vendedor">
+        <label>Nome do Vendedor:</label>
+        <input type="text" name="vendedorNome[]" required>
+        <label>CPF do Vendedor:</label>
+        <input type="text" name="vendedorCPF[]" required placeholder="000.000.000-00">
       </div>
-
-      <!-- Preview -->
-      <div class="card">
-        <h2>Pré-visualização / Impressão</h2>
-        <div class="preview">
-          <div id="receiptArea" class="receipt" aria-live="polite">
-            <!-- Recebe o recibo gerado dinamicamente -->
-            <p class="muted">Nenhum recibo gerado ainda — preencha os dados e clique em "Gerar Recibo".</p>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-primary" id="imprimirBtn">Imprimir / Salvar como PDF</button>
-          <button class="btn btn-ghost" id="baixarBtn">Baixar .txt</button>
-          <button class="btn btn-ghost" id="copiarBtn">Copiar para área de transferência</button>
-        </div>
-      </div>
+      <button type="button" onclick="addVendedor()">Adicionar Vendedor</button>
     </div>
-  </div>
+
+    <div class="section" id="compradores">
+      <h3>Compradores</h3>
+      <div class="comprador">
+        <label>Nome do Comprador:</label>
+        <input type="text" name="compradorNome[]" required>
+        <label>CPF do Comprador:</label>
+        <input type="text" name="compradorCPF[]" required placeholder="000.000.000-00">
+      </div>
+      <button type="button" onclick="addComprador()">Adicionar Comprador</button>
+    </div>
+
+    <div class="section">
+      <h3>Informações do Imóvel</h3>
+      <label>Tipo de Imóvel:</label>
+      <select name="tipoImovel" required>
+        <option value="Área de Terra">Área de Terra</option>
+        <option value="Lote">Lote</option>
+        <option value="Casa">Casa</option>
+      </select>
+
+      <label>Rua/Avenida:</label>
+      <input type="text" name="rua" required>
+      <label>Número:</label>
+      <input type="text" name="numero" required>
+      <label>Bairro:</label>
+      <input type="text" name="bairro" required>
+      <label>Cidade:</label>
+      <input type="text" name="cidade" required>
+      <label>Estado:</label>
+      <input type="text" name="estado" required>
+      <label>CEP:</label>
+      <input type="text" name="cep" required placeholder="00000-000">
+    </div>
+
+    <div class="section">
+      <h3>Valores</h3>
+      <label>Valor da Negociação (R$):</label>
+      <input type="number" name="valor" required>
+    </div>
+
+    <button type="button" onclick="gerarRecibo()">Gerar Recibo</button>
+  </form>
+
+  <div id="reciboGerado" class="recibo"></div>
 
   <script>
-    const form = document.getElementById('reciboForm');
-    const gerarBtn = document.getElementById('gerarBtn');
-    const limparBtn = document.getElementById('limparBtn');
-    const salvarModeloBtn = document.getElementById('salvarModeloBtn');
-    const receiptArea = document.getElementById('receiptArea');
-    const imprimirBtn = document.getElementById('imprimirBtn');
-    const baixarBtn = document.getElementById('baixarBtn');
-    const copiarBtn = document.getElementById('copiarBtn');
-
-    const addVendedorBtn = document.getElementById('addVendedorBtn');
-    const addCompradorBtn = document.getElementById('addCompradorBtn');
-
-    addVendedorBtn.addEventListener('click', ()=>{
+    function addVendedor() {
       const div = document.createElement('div');
       div.classList.add('vendedor');
       div.innerHTML = `
-        <label>Nome do Vendedor</label>
-        <input class="vendedorNome" placeholder="Ex: JOÃO DA SILVA" required />
-        <label>CPF</label>
-        <input class="vendedorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
+        <label>Nome do Vendedor:</label>
+        <input type="text" name="vendedorNome[]" required>
+        <label>CPF do Vendedor:</label>
+        <input type="text" name="vendedorCPF[]" required placeholder="000.000.000-00">
       `;
-      document.getElementById('vendedoresArea').appendChild(div);
-    });
+      document.getElementById('vendedores').insertBefore(div, document.querySelector('#vendedores button'));
+    }
 
-    addCompradorBtn.addEventListener('click', ()=>{
+    function addComprador() {
       const div = document.createElement('div');
       div.classList.add('comprador');
       div.innerHTML = `
-        <label>Nome do Comprador</label>
-        <input class="compradorNome" placeholder="Ex: MARIA SOUZA" required />
-        <label>CPF</label>
-        <input class="compradorCpf" placeholder="000.000.000-00" pattern="\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}" required />
+        <label>Nome do Comprador:</label>
+        <input type="text" name="compradorNome[]" required>
+        <label>CPF do Comprador:</label>
+        <input type="text" name="compradorCPF[]" required placeholder="000.000.000-00">
       `;
-      document.getElementById('compradoresArea').appendChild(div);
-    });
-
-    function formatBRL(value){
-      if(!value) return 'R$ 0,00';
-      const n = Number(String(value).replace(/,/g,'.')) || 0;
-      return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+      document.getElementById('compradores').insertBefore(div, document.querySelector('#compradores button'));
     }
 
-    function gerarTexto(){
-      const vendedores = [...document.querySelectorAll('.vendedor')].map(v=>{
-        const nome = v.querySelector('.vendedorNome').value.trim().toUpperCase();
-        const cpf = v.querySelector('.vendedorCpf').value.trim();
-        return `**${nome}** (CPF ${cpf})`;
-      });
-      const compradores = [...document.querySelectorAll('.comprador')].map(c=>{
-        const nome = c.querySelector('.compradorNome').value.trim().toUpperCase();
-        const cpf = c.querySelector('.compradorCpf').value.trim();
-        return `**${nome}** (CPF ${cpf})`;
-      });
-
-      const tipo = document.getElementById('tipoImovel').value;
-      const rua = document.getElementById('rua').value.trim();
-      const numero = document.getElementById('numero').value.trim();
-      const bairro = document.getElementById('bairro').value.trim();
-      const cidade = document.getElementById('cidade').value.trim();
-      const estado = document.getElementById('estado').value.trim();
-      const cep = document.getElementById('cep').value.trim();
-
-      const data = document.getElementById('data').value;
-      const valor = document.getElementById('valor').value.trim();
-      const forma = document.getElementById('forma').value;
-      const obs = document.getElementById('obs').value.trim();
-
-      if(vendedores.length===0 || compradores.length===0){
-        alert('Preencha ao menos um vendedor e um comprador.');
-        return null;
-      }
-
-      const dataFmt = data ? new Date(data).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
-      const valorFmt = formatBRL(valor);
-
-      let texto = `RECIBO DE PAGAMENTO - COMPRA E VENDA DE IMÓVEL\\n\\n`;
-      texto += `Vendedor(es): ${vendedores.join('; ')}\\n`;
-      texto += `Comprador(es): ${compradores.join('; ')}\\n`;
-      texto += `Imóvel: ${tipo} localizado em ${rua}, nº ${numero}, Bairro ${bairro}, ${cidade} - ${estado}, CEP ${cep}\\n`;
-      texto += `Data: ${dataFmt}\\n`;
-      texto += `Valor recebido: ${valorFmt} (${extenso(valor)})\\n`;
-      texto += `Forma de pagamento: ${forma}\\n\\n`;
-      if(obs) texto += `Observações: ${obs}\\n\\n`;
-      texto += `Cláusulas Fixas: \\n1. O vendedor declara ser legítimo possuidor do imóvel descrito neste recibo. \\n2. O comprador declara ter pleno conhecimento do estado do imóvel. \\n3. As partes elegem o foro da comarca do imóvel para dirimir quaisquer dúvidas oriundas deste recibo. \\n\\n`;
-      texto += `O vendedor declara ter recebido do comprador a quantia acima referida, nada mais tendo a reclamar a qualquer título.\\n\\n`;
-      texto += `Assinaturas:\\n\\n__________________________________\\nVendedor(es)\\n\\n__________________________________\\nComprador(es)\\n`;
-
-      return texto;
+    function formatarCPF(cpf) {
+      cpf = cpf.replace(/\D/g, "");
+      return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     }
 
-    function extenso(valor){
-      if(!valor) return 'zero reais';
-      let n = Number(String(valor).replace(/[^0-9,\.]/g,'').replace(/,/g,'.')) || 0;
-      const inteiro = Math.floor(n);
-      const cent = Math.round((n - inteiro) * 100);
-      const extReais = numeroPorExtenso(inteiro) + (inteiro===1 ? ' real' : ' reais');
-      const extCent = cent>0 ? ' e ' + numeroPorExtenso(cent) + (cent===1 ? ' centavo' : ' centavos') : '';
-      return extReais + extCent;
+    function gerarRecibo() {
+      const form = document.getElementById('reciboForm');
+      const data = new FormData(form);
+
+      const vendedores = data.getAll('vendedorNome[]').map((nome, i) => `<span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('vendedorCPF[]')[i])}`);
+      const compradores = data.getAll('compradorNome[]').map((nome, i) => `<span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('compradorCPF[]')[i])}`);
+
+      const tipoImovel = data.get('tipoImovel');
+      const endereco = `${data.get('rua')}, nº ${data.get('numero')}, Bairro ${data.get('bairro')}, ${data.get('cidade')} - ${data.get('estado')}, CEP ${data.get('cep')}`;
+      const valor = parseFloat(data.get('valor')).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+      const clausulas = `
+        <p>As partes acima identificadas celebram o presente recibo de compra e venda de imóvel, de forma justa e acordada, regendo-se pelas cláusulas seguintes:</p>
+        <ul>
+          <li>O vendedor declara que o imóvel descrito encontra-se livre de quaisquer ônus ou dívidas.</li>
+          <li>O comprador declara estar ciente das condições do imóvel.</li>
+          <li>As partes elegem o foro da comarca do imóvel para dirimir quaisquer dúvidas oriundas deste recibo.</li>
+        </ul>
+      `;
+
+      document.getElementById('reciboGerado').innerHTML = `
+        <h2>Recibo de Compra e Venda de Imóvel</h2>
+        <p><strong>Vendedores:</strong> ${vendedores.join('; ')}</p>
+        <p><strong>Compradores:</strong> ${compradores.join('; ')}</p>
+        <p><strong>Imóvel:</strong> ${tipoImovel}, localizado em ${endereco}.</p>
+        <p><strong>Valor:</strong> ${valor}</p>
+        ${clausulas}
+      `;
     }
-
-    function numeroPorExtenso(n){
-      if(n===0) return 'zero';
-      const unidades = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
-      const dezenas = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
-      const centenas = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
-      if(n===100) return 'cem';
-      if(n < 20) return unidades[n];
-      if(n < 100){ const d = Math.floor(n/10); const r = n%10; return dezenas[d] + (r? ' e ' + unidades[r] : ''); }
-      if(n < 1000){ const c = Math.floor(n/100); const r = n%100; return centenas[c] + (r? ' e ' + numeroPorExtenso(r) : ''); }
-      if(n < 1000000){ const milhares = Math.floor(n/1000); const resto = n%1000; const milStr = (milhares===1? 'mil' : numeroPorExtenso(milhares) + ' mil'); return milStr + (resto? (resto<100? ' e ' : ' ') + numeroPorExtenso(resto) : ''); }
-      return n.toString();
-    }
-
-    function renderPreview(text){
-      if(!text) return;
-      receiptArea.innerHTML = '';
-      const pre = document.createElement('pre');
-      pre.style.margin = '0';
-      pre.style.whiteSpace = 'pre-wrap';
-      pre.textContent = text;
-      receiptArea.appendChild(pre);
-    }
-
-    gerarBtn.addEventListener('click', ()=>{
-      const texto = gerarTexto();
-      if(texto) renderPreview(texto);
-    });
-
-    limparBtn.addEventListener('click', ()=>{
-      form.reset();
-      receiptArea.innerHTML = '<p class="muted">Nenhum recibo gerado ainda — preencha os dados e clique em "Gerar Recibo".</p>';
-    });
-
-    salvarModeloBtn.addEventListener('click', ()=>{
-      const modelo = form.innerHTML;
-      localStorage.setItem('reciboModelo', modelo);
-      alert('Modelo salvo no navegador.');
-    });
-
-    window.addEventListener('load', ()=>{
-      // simples restauração dos campos salvos
-   
+  </script>
+</body>
+</html>
