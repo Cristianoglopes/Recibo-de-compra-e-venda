@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador de Recibo de Compra e Venda de Imóveis</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { text-align: center; }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+    h1 { text-align: center; margin-bottom: 20px; }
     label { display: block; margin-top: 10px; }
-    input, select { padding: 5px; width: 100%; margin-top: 5px; }
-    button { margin-top: 10px; padding: 8px 12px; cursor: pointer; border-radius: 6px; }
-    .section { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; border-radius: 8px; }
-    .recibo { margin-top: 30px; padding: 20px; border: 2px solid #000; }
+    input, select, textarea { padding: 6px; width: 100%; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; }
+    button { margin-top: 10px; padding: 8px 12px; cursor: pointer; border-radius: 6px; border: none; background: #4CAF50; color: white; }
+    button:hover { background: #45a049; }
+    .section { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 10px; background: #fff; }
+    .recibo { margin-top: 30px; padding: 20px; border: 2px solid #000; background: #fff; }
     .bold { font-weight: bold; }
+    .download-buttons { margin-top: 15px; display: flex; gap: 10px; }
   </style>
 </head>
 <body>
@@ -22,10 +24,16 @@
     <div class="section" id="vendedores">
       <h3>Vendedores</h3>
       <div class="vendedor">
-        <label>Nome do Vendedor:</label>
+        <label>Nome:</label>
         <input type="text" name="vendedorNome[]" required>
-        <label>CPF do Vendedor:</label>
+        <label>CPF:</label>
         <input type="text" name="vendedorCPF[]" required placeholder="000.000.000-00">
+        <label>Endereço:</label>
+        <input type="text" name="vendedorEndereco[]" required>
+        <label>Profissão:</label>
+        <input type="text" name="vendedorProfissao[]">
+        <label>Estado Civil:</label>
+        <input type="text" name="vendedorEstadoCivil[]">
       </div>
       <button type="button" onclick="addVendedor()">Adicionar Vendedor</button>
     </div>
@@ -33,10 +41,16 @@
     <div class="section" id="compradores">
       <h3>Compradores</h3>
       <div class="comprador">
-        <label>Nome do Comprador:</label>
+        <label>Nome:</label>
         <input type="text" name="compradorNome[]" required>
-        <label>CPF do Comprador:</label>
+        <label>CPF:</label>
         <input type="text" name="compradorCPF[]" required placeholder="000.000.000-00">
+        <label>Endereço:</label>
+        <input type="text" name="compradorEndereco[]" required>
+        <label>Profissão:</label>
+        <input type="text" name="compradorProfissao[]">
+        <label>Estado Civil:</label>
+        <input type="text" name="compradorEstadoCivil[]">
       </div>
       <button type="button" onclick="addComprador()">Adicionar Comprador</button>
     </div>
@@ -70,20 +84,36 @@
       <input type="number" name="valor" required>
     </div>
 
+    <div class="section">
+      <h3>Cláusulas adicionais</h3>
+      <textarea name="clausulasAdicionais" rows="4" placeholder="Digite cláusulas adicionais, se necessário..."></textarea>
+    </div>
+
     <button type="button" onclick="gerarRecibo()">Gerar Recibo</button>
   </form>
 
   <div id="reciboGerado" class="recibo"></div>
+  <div id="downloadButtons" class="download-buttons" style="display:none;">
+    <button onclick="baixarArquivo('pdf')">Baixar PDF</button>
+    <button onclick="baixarArquivo('txt')">Baixar TXT</button>
+    <button onclick="baixarArquivo('doc')">Baixar Word</button>
+  </div>
 
   <script>
     function addVendedor() {
       const div = document.createElement('div');
       div.classList.add('vendedor');
       div.innerHTML = `
-        <label>Nome do Vendedor:</label>
+        <label>Nome:</label>
         <input type="text" name="vendedorNome[]" required>
-        <label>CPF do Vendedor:</label>
+        <label>CPF:</label>
         <input type="text" name="vendedorCPF[]" required placeholder="000.000.000-00">
+        <label>Endereço:</label>
+        <input type="text" name="vendedorEndereco[]" required>
+        <label>Profissão:</label>
+        <input type="text" name="vendedorProfissao[]">
+        <label>Estado Civil:</label>
+        <input type="text" name="vendedorEstadoCivil[]">
       `;
       document.getElementById('vendedores').insertBefore(div, document.querySelector('#vendedores button'));
     }
@@ -92,10 +122,16 @@
       const div = document.createElement('div');
       div.classList.add('comprador');
       div.innerHTML = `
-        <label>Nome do Comprador:</label>
+        <label>Nome:</label>
         <input type="text" name="compradorNome[]" required>
-        <label>CPF do Comprador:</label>
+        <label>CPF:</label>
         <input type="text" name="compradorCPF[]" required placeholder="000.000.000-00">
+        <label>Endereço:</label>
+        <input type="text" name="compradorEndereco[]" required>
+        <label>Profissão:</label>
+        <input type="text" name="compradorProfissao[]">
+        <label>Estado Civil:</label>
+        <input type="text" name="compradorEstadoCivil[]">
       `;
       document.getElementById('compradores').insertBefore(div, document.querySelector('#compradores button'));
     }
@@ -109,15 +145,18 @@
       const form = document.getElementById('reciboForm');
       const data = new FormData(form);
 
-      const vendedores = data.getAll('vendedorNome[]').map((nome, i) => `<span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('vendedorCPF[]')[i])}`);
-      const compradores = data.getAll('compradorNome[]').map((nome, i) => `<span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('compradorCPF[]')[i])}`);
+      const vendedores = data.getAll('vendedorNome[]').map((nome, i) => `
+        <p><span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('vendedorCPF[]')[i])}, ${data.getAll('vendedorEstadoCivil[]')[i]}, ${data.getAll('vendedorProfissao[]')[i]}, residente em ${data.getAll('vendedorEndereco[]')[i]}.</p>`).join('');
+
+      const compradores = data.getAll('compradorNome[]').map((nome, i) => `
+        <p><span class="bold">${nome.toUpperCase()}</span>, CPF: ${formatarCPF(data.getAll('compradorCPF[]')[i])}, ${data.getAll('compradorEstadoCivil[]')[i]}, ${data.getAll('compradorProfissao[]')[i]}, residente em ${data.getAll('compradorEndereco[]')[i]}.</p>`).join('');
 
       const tipoImovel = data.get('tipoImovel');
       const endereco = `${data.get('rua')}, nº ${data.get('numero')}, Bairro ${data.get('bairro')}, ${data.get('cidade')} - ${data.get('estado')}, CEP ${data.get('cep')}`;
       const valor = parseFloat(data.get('valor')).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-      const clausulas = `
-        <p>As partes acima identificadas celebram o presente recibo de compra e venda de imóvel, de forma justa e acordada, regendo-se pelas cláusulas seguintes:</p>
+      const clausulasFixas = `
+        <p>As partes acima identificadas celebram o presente recibo de compra e venda de imóvel, regendo-se pelas cláusulas seguintes:</p>
         <ul>
           <li>O vendedor declara que o imóvel descrito encontra-se livre de quaisquer ônus ou dívidas.</li>
           <li>O comprador declara estar ciente das condições do imóvel.</li>
@@ -125,14 +164,44 @@
         </ul>
       `;
 
-      document.getElementById('reciboGerado').innerHTML = `
+      const clausulasAdicionais = data.get('clausulasAdicionais') ? `<p><strong>Cláusulas adicionais:</strong> ${data.get('clausulasAdicionais')}</p>` : '';
+
+      const reciboHTML = `
         <h2>Recibo de Compra e Venda de Imóvel</h2>
-        <p><strong>Vendedores:</strong> ${vendedores.join('; ')}</p>
-        <p><strong>Compradores:</strong> ${compradores.join('; ')}</p>
+        <h3>Vendedores:</h3> ${vendedores}
+        <h3>Compradores:</h3> ${compradores}
         <p><strong>Imóvel:</strong> ${tipoImovel}, localizado em ${endereco}.</p>
         <p><strong>Valor:</strong> ${valor}</p>
-        ${clausulas}
+        ${clausulasFixas}
+        ${clausulasAdicionais}
       `;
+
+      document.getElementById('reciboGerado').innerHTML = reciboHTML;
+      document.getElementById('downloadButtons').style.display = 'flex';
+    }
+
+    function baixarArquivo(tipo) {
+      const recibo = document.getElementById('reciboGerado').innerHTML;
+      let blob, ext, mime;
+
+      if (tipo === 'txt') {
+        const text = document.getElementById('reciboGerado').innerText;
+        blob = new Blob([text], { type: 'text/plain' });
+        ext = 'txt';
+      } else if (tipo === 'doc') {
+        blob = new Blob(['<html><body>' + recibo + '</body></html>'], { type: 'application/msword' });
+        ext = 'doc';
+      } else if (tipo === 'pdf') {
+        alert("Exportar para PDF requer uma biblioteca adicional como jsPDF. Posso incluir isso se desejar.");
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `recibo.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>
